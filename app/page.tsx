@@ -1,65 +1,282 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useState, useEffect } from 'react';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { Crosshair, Send, Loader2, Lock, MapPin, Sparkles, Fingerprint, AlertTriangle, CalendarDays } from 'lucide-react';
+
+const TiltCard = ({ children, className = '' }: { children: React.ReactNode, className?: string }) => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <motion.div
+      whileHover={{ scale: 1.02, rotateX: 5, rotateY: -5 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className={`relative rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden ${className}`}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50 pointer-events-none" />
+      {children}
+    </motion.div>
+  );
+};
+
+export default function ExtremeTreasureHunt() {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isIdle, setIsIdle] = useState(true); 
+
+  const { scrollYProgress } = useScroll();
+  const yBg = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
+  const opacityHero = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const scaleHero = useTransform(scrollYProgress, [0, 0.2], [1, 0.8]);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+      setIsIdle(false); // La souris a le contrôle
+      
+      // Si la souris s'arrête 2 secondes, on repasse en mode Fantôme
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => setIsIdle(true), 2000); 
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
+  // 2. Le moteur de mouvement aléatoire (Ghost Mode)
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    
+    if (isIdle) {
+      const moveRandomly = () => {
+        // Calcule des coordonnées aléatoires dans les limites de l'écran
+        const randomX = Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000);
+        const randomY = Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000);
+        setMousePosition({ x: randomX, y: randomY });
+      };
+
+      moveRandomly(); // Premier mouvement immédiat
+      intervalId = setInterval(moveRandomly, 4000); // Change de cap toutes les 4 secondes
+    }
+    
+    return () => clearInterval(intervalId);
+  }, [isIdle]);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('sending');
+    
+    try {
+      // INTÉGRATION DU WEBHOOK n8n
+      const response = await fetch('https://n8n-latest-fsq5.onrender.com/webhook/chasse-tresor-inscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: email,
+          source: 'Landing Page Chasse 2026',
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      if (response.ok) {
+        setStatus('success');
+        setEmail('');
+      } else {
+        setStatus('error');
+      }
+    } catch (error) {
+      console.error("Erreur de connexion n8n:", error);
+      setStatus('error');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-black text-white font-sans overflow-hidden relative selection:bg-amber-500 selection:text-black">
+      
+      {/* BACKGROUND FX */}
+      <div className="fixed inset-0 opacity-20 mix-blend-overlay z-0 pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      
+      {/* Couche 2 : Orbes lumineuses dynamiques (Ghost Mode & Follow) */}
+      <motion.div 
+        className="fixed top-0 left-0 w-[800px] h-[800px] bg-amber-600/20 rounded-full blur-[150px] pointer-events-none z-0"
+        animate={{ 
+          x: mousePosition.x - 400, 
+          y: mousePosition.y - 400 
+        }}
+        transition={
+          isIdle 
+            ? { type: "tween", ease: "easeInOut", duration: 4 } // Mode Fantôme : Flotte doucement
+            : { type: "tween", ease: "backOut", duration: 0.5 } // Mode Souris : Réactif et rapide
+        }
+      />
+      
+      <motion.div 
+        style={{ y: yBg }}
+        className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] z-0 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"
+      />
+
+      {/* HERO SECTION */}
+      <motion.section 
+        style={{ opacity: opacityHero, scale: scaleHero }}
+        className="relative min-h-screen flex flex-col items-center justify-center text-center px-4 z-10 pt-20"
+      >
+        {/* BANNIÈRE DATE DE LANCEMENT - TRÈS VISIBLE */}
+        <motion.div 
+          initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, ease: "easeOut", type: "spring" }}
+          className="relative inline-flex items-center gap-4 px-8 py-4 rounded-xl border-2 border-amber-500 bg-amber-500/10 backdrop-blur-xl mb-12 shadow-[0_0_50px_rgba(245,158,11,0.4)] group overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/20 to-amber-500/0 -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
+          <CalendarDays className="w-8 h-8 text-amber-400 animate-pulse" />
+          <div className="text-left">
+            <p className="text-amber-500 text-[10px] font-mono tracking-[0.3em] uppercase mb-1">Top Départ & Premier Indice</p>
+            <p className="text-white text-xl md:text-2xl font-black uppercase tracking-widest">
+              Samedi 28 Février — 05H00
+            </p>
+          </div>
+        </motion.div>
+
+        <h1 className="text-7xl md:text-[9rem] font-black tracking-tighter leading-none mb-6 relative">
+          <span className="absolute inset-0 blur-2xl opacity-50 bg-gradient-to-r from-amber-400 via-yellow-600 to-amber-400 bg-clip-text text-transparent animate-pulse">
+            CHASSE AU TRÉSOR
+          </span>
+          <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-300 to-white">
+            CHASSE AU TRÉSOR
+          </span>
+        </h1>
+
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.3, duration: 0.8 }}
+          className="relative group mb-12"
+        >
+          <div className="absolute -inset-1 bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600 rounded-lg blur opacity-40 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+          <h2 className="relative px-8 py-4 bg-black border border-white/10 rounded-lg text-4xl md:text-5xl font-serif italic text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500">
+            Édition 2026
+          </h2>
+        </motion.div>
+
+        <p className="text-xl md:text-2xl text-slate-300 max-w-2xl font-light mb-12 drop-shadow-md">
+          Un Ticket d'Or d'une valeur de <strong className="text-amber-400">1500 CHF</strong>  valable sur toute la boutique NeoCard.ch est dissimulé dans les montagnes. 
+          Inscrivez-vous avant le lancement pour recevoir les indices menant à sa découverte et soyez le premier à le trouver!
+        </p>
+
+        <a href="#radar" className="group relative px-12 py-5 font-bold text-black rounded-full overflow-hidden bg-amber-500 transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(245,158,11,0.6)]">
+          <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+          <span className="relative flex items-center gap-3 tracking-widest uppercase text-sm">
+            Rejoindre le radar <Crosshair className="w-5 h-5 animate-spin-slow" />
+          </span>
+        </a>
+      </motion.section>
+
+      {/* SECTION INSCRIPTION */}
+      <section id="radar" className="py-32 px-4 relative z-10">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          
+          <TiltCard className="p-10 md:p-14">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
+            
+            <AnimatePresence mode="wait">
+              {status === 'success' ? (
+                <motion.div 
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-12"
+                >
+                  <Fingerprint className="w-20 h-20 text-amber-500 mx-auto mb-6 animate-pulse" />
+                  <h3 className="text-3xl font-serif text-white mb-2">Empreinte Validée</h3>
+                  <p className="text-slate-400">Vous êtes sur la liste. Soyez prêt le samedi 28 février à 05h00.</p>
+                </motion.div>
+              ) : (
+                <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                      <Sparkles className="w-8 h-8 text-amber-400" />
+                    </div>
+                    <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-white">Connexion<br/>au Réseau</h3>
+                  </div>
+                  
+                  <p className="text-slate-400 mb-10 text-lg font-light">
+                    Le Ticket d'Or n'attend qu'un seul gagnant. Entrez votre email pour recevoir l'Indice Alpha dès l'ouverture de la chasse.
+                  </p>
+                  
+                  <form onSubmit={handleSubscribe} className="space-y-6">
+                    <div className="relative group">
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-yellow-600 rounded-xl blur opacity-20 group-hover:opacity-50 transition duration-500"></div>
+                      <input 
+                        type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                        placeholder="coordonnees@agent.com" 
+                        className="relative w-full bg-black/80 backdrop-blur-md border border-white/10 rounded-xl px-6 py-5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-all font-mono" 
+                      />
+                    </div>
+                    
+                    {status === 'error' && (
+                      <p className="text-rose-500 text-sm flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4" /> Erreur de transmission réseau. Réessayez.
+                      </p>
+                    )}
+
+                    <button 
+                      disabled={status === 'sending'} type="submit" 
+                      className="w-full relative overflow-hidden bg-white text-black font-black py-5 rounded-xl transition-all hover:bg-slate-200 disabled:opacity-50 flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-sm"
+                    >
+                      {status === 'sending' ? (
+                        <><Loader2 className="w-5 h-5 animate-spin" /> SYNCHRONISATION...</>
+                      ) : (
+                        <>Activer le Radar <Send className="w-5 h-5" /></>
+                      )}
+                    </button>
+                  </form>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </TiltCard>
+
+          {/* HUD (Head Up Display) - Liste des indices en 3D */}
+          <div className="space-y-6 perspective-1000">
+            <h4 className="text-amber-500 font-mono text-sm tracking-widest uppercase mb-8 flex items-center gap-2">
+              <span className="w-2 h-2 bg-amber-500 rounded-full animate-ping" /> Chronologie des Transmissions
+            </h4>
+
+            {[
+              { id: "01", status: "LOCKED", title: "Indice Alpha", date: "Déverrouillage : Samedi 28.02 - 05:00", delay: 0 },
+              { id: "02", status: "LOCKED", title: "Indice Bravo", date: "Déverrouillage : Lundi 02.03", delay: 0.1 },
+              { id: "03", status: "LOCKED", title: "Indice Charlie", date: "Déverrouillage : Mercredi 04.03", delay: 0.2 },
+            ].map((clue, idx) => (
+              <motion.div 
+                key={clue.id}
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: clue.delay, type: "spring" }}
+                className="relative p-6 rounded-xl border backdrop-blur-md flex items-center gap-6 overflow-hidden bg-white/5 border-white/10 opacity-70"
+              >
+                <div className="font-black text-4xl text-white/10">{clue.id}</div>
+                
+                <div className="flex-1">
+                  <h5 className="text-xl font-bold mb-1 text-slate-500">{clue.title}</h5>
+                  <p className="text-xs font-mono uppercase tracking-widest text-amber-500/80">
+                    {clue.date}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-full border border-white/10 text-slate-600 bg-black/50">
+                  <Lock className="w-6 h-6" />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </section>
+
+      <footer className="py-12 text-center border-t border-white/5 bg-black/80 backdrop-blur-xl relative z-10">
+        <p className="text-slate-600 text-xs font-mono tracking-[0.3em]">
+          NEOCARD SYS // PROPRIÉTÉ DE M. KAESER // VALAIS 2026
+        </p>
+      </footer>
     </div>
   );
 }
