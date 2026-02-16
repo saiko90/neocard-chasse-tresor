@@ -242,7 +242,7 @@ export default function ExtremeTreasureHunt() {
 
             {[
               { id: "01", status: "LOCKED", title: "Indice Alpha", date: "Déverrouillage : Samedi 28.02 - 05:00", delay: 0 },
-              { id: "02", status: "LOCKED", title: "Indice Bravo", date: "Déverrouillage : Lundi 02.03", delay: 0.1 },
+              { id: "02", status: "LOCKED", title: "Indice Bravo", date: "Déverrouillage : Dimanche 01.03", delay: 0.1 },
               { id: "03", status: "LOCKED", title: "Indice Charlie", date: "Déverrouillage : Mercredi 04.03", delay: 0.2 },
             ].map((clue, idx) => (
               <motion.div 
