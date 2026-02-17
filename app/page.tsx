@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Crosshair, Send, Loader2, Lock, MapPin, Sparkles, Fingerprint, AlertTriangle, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Crosshair, Send, Loader2, Lock, MapPin, Sparkles, Fingerprint, AlertTriangle, CalendarDays } from 'lucide-react';
 
 const TiltCard = ({ children, className = '' }: { children: React.ReactNode, className?: string }) => {
   return (
@@ -96,7 +96,17 @@ export default function ExtremeTreasureHunt() {
 
   return (
     <div className="min-h-screen bg-black text-white font-sans overflow-hidden relative selection:bg-amber-500 selection:text-black">
-      
+      {/* BOUTON RETOUR MISSION */}
+        <motion.a
+          href="https://www.neocard.ch"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.5 }}
+          className="fixed top-6 left-6 z-[100] flex items-center gap-2 px-4 py-2 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-slate-400 hover:text-amber-500 hover:border-amber-500/50 transition-all group"
+        >
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          <span className="text-xs font-mono uppercase tracking-[0.2em]">Quitter la mission</span>
+        </motion.a>
       {/* BACKGROUND FX */}
       <div className="fixed inset-0 opacity-20 mix-blend-overlay z-0 pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
       
