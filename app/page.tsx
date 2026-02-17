@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { sendGAEvent } from '@next/third-parties/google';
 import { ArrowLeft, Crosshair, Send, Loader2, Lock, MapPin, Sparkles, Fingerprint, AlertTriangle, CalendarDays, Scale } from 'lucide-react';
 
 const TiltCard = ({ children, className = '' }: { children: React.ReactNode, className?: string }) => {
@@ -73,6 +74,12 @@ export default function ExtremeTreasureHunt() {
       if (response.ok) {
         setStatus('success');
         setEmail('');
+        
+        // NOUVEAU : On envoie l'événement à Google Analytics !
+        sendGAEvent('event', 'generate_lead', {
+          method: 'treasure_hunt_form',
+        });
+
       } else {
         setStatus('error');
       }
