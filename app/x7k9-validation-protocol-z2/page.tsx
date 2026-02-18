@@ -60,7 +60,7 @@ function GoldenTicketContent() {
 
     try {
       // Ton URL n8n
-      const response = await fetch('https://n8n-latest-fsq5.onrender.com/webhook/chasse-tresor-gagnant', {
+      const response = await fetch('https://n8n-latest-fsq5.onrender.com/webhook/winner', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
