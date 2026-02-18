@@ -22,7 +22,7 @@ const TiltCard = ({ children, className = '' }: { children: React.ReactNode, cla
 };
 
 export default function GoldenTicketPage() {
-  const [formData, setFormData] = useState({ nom: '', prenom: '' });
+  const [formData, setFormData] = useState({ nom: '', prenom: '' ,email: '' });
   const [status, setStatus] = useState<'validating' | 'idle' | 'sending' | 'success' | 'error'>('validating');
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
@@ -54,12 +54,13 @@ export default function GoldenTicketPage() {
 
     try {
       // ⚠️ REMPLACE CETTE URL PAR TON NOUVEAU WEBHOOK N8N POUR LE GAGNANT
-      const response = await fetch('https://ton-n8n-instance.onrender.com/webhook/chasse-tresor-gagnant', {
+      const response = await fetch('https://n8n-latest-fsq5.onrender.com/webhook/winner', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           nom: formData.nom,
           prenom: formData.prenom,
+          email: formData.email,
           source: 'QR CODE TICKET OR',
           timestamp: new Date().toISOString(),
           deviceInfo: navigator.userAgent
@@ -155,6 +156,19 @@ export default function GoldenTicketPage() {
                   </p>
                 </div>
 
+                {/* Champ Email */}
+                    <div className="space-y-1 col-span-2">
+                    <label className="text-[10px] uppercase tracking-widest text-slate-500 pl-1">Email de contact</label>
+                    <input 
+                        type="email" 
+                        required 
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none focus:bg-amber-500/5 transition-colors font-mono"
+                        placeholder="agent@neocard.ch"
+                    />
+                    </div>
+
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
@@ -165,7 +179,7 @@ export default function GoldenTicketPage() {
                         value={formData.prenom}
                         onChange={(e) => setFormData({...formData, prenom: e.target.value})}
                         className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none focus:bg-amber-500/5 transition-colors font-mono"
-                        placeholder="Michaël"
+                        placeholder="James"
                       />
                     </div>
                     <div className="space-y-1">
@@ -176,7 +190,7 @@ export default function GoldenTicketPage() {
                         value={formData.nom}
                         onChange={(e) => setFormData({...formData, nom: e.target.value})}
                         className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none focus:bg-amber-500/5 transition-colors font-mono"
-                        placeholder="Kaeser"
+                        placeholder="Bond"
                       />
                     </div>
                   </div>
