@@ -229,10 +229,10 @@ export default function GoldenTicketPage() {
                   Votre revendication a été transmise instantanément à la direction Neocard. 
                   <br/><br/>
                   <span className="text-amber-500">Gardez le ticket physique précieusement.</span>
-                  <br/>Nous allons prendre contact avec vous dans les prochaines minutes.
+                  <br/>Nous allons prendre contact avec vous dans les prochaines heures.
                 </p>
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-slate-500">
-                  <Crown className="w-3 h-3 text-amber-500" /> Membre d'Honneur Mountain Legion
+                  <Crown className="w-3 h-3 text-amber-500" /> Membre d'Honneur NeoCard
                 </div>
               </motion.div>
             )}
