@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Send, Loader2, CheckCircle2, ShieldCheck, Crown, Terminal } from 'lucide-react';
 import confetti from 'canvas-confetti'; // Optionnel : installez 'canvas-confetti' et '@types/canvas-confetti' si vous voulez des confettis, sinon retirez l'effet.
@@ -25,6 +26,8 @@ export default function GoldenTicketPage() {
   const [formData, setFormData] = useState({ nom: '', prenom: '' ,email: '' });
   const [status, setStatus] = useState<'validating' | 'idle' | 'sending' | 'success' | 'error'>('validating');
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
 
   // Effet de souris (identique à la page principale)
   useEffect(() => {
@@ -51,6 +54,12 @@ export default function GoldenTicketPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('sending');
+
+    // SÉCURITÉ : Si pas de token dans l'URL, on bloque tout de suite
+    if (token !== 'MOUNTAIN-SECURE-2026') { // Tu peux aussi vérifier ça côté n8n pour plus de sécurité
+       alert("Erreur : Ticket non authentifié. Scannez le QR Code officiel.");
+       return;
+    }
 
     try {
       // ⚠️ REMPLACE CETTE URL PAR TON NOUVEAU WEBHOOK N8N POUR LE GAGNANT
